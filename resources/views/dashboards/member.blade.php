@@ -30,7 +30,7 @@
                         </span>
                         @endif
                     </h2>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-4">
                         @if(isset($viewingContext))
                         <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                             Viewing Mode
@@ -38,6 +38,30 @@
                         @endif
                         <span
                             class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">Member</span>
+                        <!-- Profile Dropdown -->
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
+                                <img src="{{ $user->avatar_url }}" alt="avatar"
+                                    class="h-8 w-8 rounded-full border border-gray-300 object-cover">
+                                <span class="font-medium text-gray-700">{{ $user->name }}</span>
+                                <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.away="open = false"
+                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                                <a href="{{ route('profile') }}"
+                                    class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile Management</a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">Log
+                                        Out</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
