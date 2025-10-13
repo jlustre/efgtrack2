@@ -1,66 +1,4 @@
-<?php
-
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Validation\Rule;
-use Livewire\Volt\Component;
-
-new class extends Component
-{
-    public string $name = '';
-    public string $email = '';
-
-    /**
-     * Mount the component.
-     */
-    public function mount(): void
-    {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
-    }
-
-    /**
-     * Update the profile information for the currently authenticated user.
-     */
-    public function updateProfileInformation(): void
-    {
-        $user = Auth::user();
-
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
-        ]);
-
-        $user->fill($validated);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
-        $user->save();
-
-        $this->dispatch('profile-updated', name: $user->name);
-    }
-
-    /**
-     * Send an email verification notification to the current user.
-     */
-    public function sendVerification(): void
-    {
-        $user = Auth::user();
-
-        if ($user->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('dashboard', absolute: false));
-
-            return;
-        }
-
-        $user->sendEmailVerificationNotification();
-
-        Session::flash('status', 'verification-link-sent');
-    }
-}; ?>
+<!-- Controller logic removed. This file is now view-only as requested. -->
 
 <section>
     <header>
@@ -73,7 +11,29 @@ new class extends Component
         </p>
     </header>
 
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
+    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6 drag-scroll"
+        style="max-height: 600px; overflow-y: auto;">
+        <!-- Error Message (inside form, above first input) -->
+        @if ($errors->any())
+        <div class="mb-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error:</strong>
+                <span class="block sm:inline">Please fix the errors below and try again.</span>
+                <ul class="mt-2 list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @elseif (session('error'))
+        <div class="mb-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error:</strong>
+                <span class="block sm:inline">{{ session('error') }}</span>
+            </div>
+        </div>
+        @endif
         <!-- Profile Picture Preview -->
         @if($this->user->avatar_url)
         <div class="flex items-center space-x-4">
@@ -91,10 +51,14 @@ new class extends Component
             <div>
                 <x-input-label for="username" :value="__('Username')" />
                 <x-text-input wire:model="username" id="username" name="username" type="text" class="mt-1 block w-full"
-                    autocomplete="username" />
-                <x-input-error class="mt-2" :messages="$errors->get('username')" />
-                <p class="mt-1 text-xs text-gray-500">Your unique username (e.g., @{{ $username ?: 'yourusername' }})
-                </p>
+                    autocomplete="username" @if(!Auth::user() || !Auth::user()->hasRole('admin')) readonly @endif />
+                    <x-input-error class="mt-2" :messages="$errors->get('username')" />
+                    <p class="mt-1 text-xs text-gray-500">
+                        Your unique username (e.g., @{{ $username ?: 'yourusername' }})<br>
+                        @if(!Auth::user() || !Auth::user()->hasRole('admin'))
+                        <span class="text-red-500">Only admins can change your username.</span>
+                        @endif
+                    </p>
             </div>
 
             <!-- First Name -->
@@ -198,19 +162,26 @@ new class extends Component
                 <!-- Country -->
                 <div>
                     <x-input-label for="country" :value="__('Country')" />
-                    <select wire:model="country" id="country" name="country"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        <option value="">Select Country</option>
-                        <option value="CA">Canada</option>
-                        <option value="US">United States</option>
-                        <option value="GB">United Kingdom</option>
-                        <option value="AU">Australia</option>
-                        <option value="DE">Germany</option>
-                        <option value="FR">France</option>
-                        <option value="JP">Japan</option>
-                        <!-- Add more countries as needed -->
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                    <div>
+                        <select x-model="selectedCountry" wire:model="country" id="country" name="country"
+                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">Select Country</option>
+                            @foreach($activeCountries as $country)
+                            <option value="{{ $country->code }}">{{ $country->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                        <!-- Province/State -->
+                        <x-input-label for="province_state" :value="__('Province/State')" class="mt-4" />
+                        <select wire:model="province_state" id="province_state" name="province_state"
+                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            <option value="">Select State/Province</option>
+                            @foreach($stateOptions as $state)
+                            <option value="{{ $state->code }}">{{ $state->name }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error class="mt-2" :messages="$errors->get('province_state')" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -299,8 +270,8 @@ new class extends Component
                     @if($this->user->sponsor)
                     <div>
                         <dt class="text-sm font-medium text-gray-500">Sponsored by</dt>
-                        <dd class="text-sm text-gray-900">{{ $this->user->sponsor->display_name }} (@{{
-                            $this->user->sponsor->username }})</dd>
+                        <dd class="text-sm text-gray-900">{{ $this->user->sponsor->display_name }} ({{
+                            '@'. $this->user->sponsor->username }})</dd>
                     </div>
                     @endif
 
@@ -333,6 +304,21 @@ new class extends Component
         </div>
         @endif
 
+        <!-- Error Message -->
+        @if ($errors->any())
+        <div class="mb-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error:</strong>
+                <span class="block sm:inline">Please fix the errors below and try again.</span>
+                <ul class="mt-2 list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @endif
+
         <!-- Action Buttons -->
         <div class="flex items-center gap-4 pt-6 border-t border-gray-200">
             <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
@@ -342,4 +328,35 @@ new class extends Component
             </x-action-message>
         </div>
     </form>
+    <script>
+        // Drag-to-scroll for vertical scrolling
+            document.addEventListener('DOMContentLoaded', function() {
+                const el = document.querySelector('.drag-scroll');
+                if (!el) return;
+                let isDown = false;
+                let startY;
+                let scrollTop;
+                el.addEventListener('mousedown', function(e) {
+                    isDown = true;
+                    el.classList.add('scrolling');
+                    startY = e.pageY - el.offsetTop;
+                    scrollTop = el.scrollTop;
+                });
+                document.addEventListener('mouseup', function() {
+                    isDown = false;
+                    el.classList.remove('scrolling');
+                });
+                el.addEventListener('mouseleave', function() {
+                    isDown = false;
+                    el.classList.remove('scrolling');
+                });
+                el.addEventListener('mousemove', function(e) {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const y = e.pageY - el.offsetTop;
+                    const walk = (y - startY);
+                    el.scrollTop = scrollTop - walk;
+                });
+            });
+    </script>
 </section>

@@ -28,16 +28,25 @@ class User extends Authenticatable
         'email',
         'password',
         'sponsor_id',
+        'rank_id',
+        'assigned_mentor_id',
+        'assigned_manager_id',
         'phone',
-    'avatar',
-    'avatar_path',
+        'avatar',
+        'avatar_path',
         'city',
-        'province_state',
-        'country',
+        'state_id',
+        'country_id',
         'postal_code',
         'timezone',
         'best_contact_times',
         'profile_completed',
+        'is_licensed',
+        'is_online',
+        'last_active_at',
+        'last_login_at',
+        'last_login_ip',
+        'language',
         'member_status',
         'theme_settings',
     ];
@@ -64,7 +73,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'theme_settings' => 'array',
             'best_contact_times' => 'array',
-            'profile_completed' => 'boolean',
+            'profile_completed' => 'float',
         ];
     }
 
@@ -303,17 +312,42 @@ class User extends Authenticatable
     public function isProfileComplete(): bool
     {
         $requiredFields = [
-            'first_name', 'last_name', 'username', 'email', 'phone',
-            'city', 'province_state', 'country', 'postal_code', 'timezone'
+            'sponsor_id', 'username', 'name', 'first_name', 'last_name', 'email', 'password',
+            'phone', 'avatar_path', 'city', 'state_id', 'country_id', 'postal_code', 'timezone', 'best_contact_times', 'is_licensed'
         ];
 
+        $filled = 0;
         foreach ($requiredFields as $field) {
-            if (empty($this->$field)) {
-                return false;
+            if (!empty($this->$field)) {
+                $filled++;
             }
         }
+        return $filled === count($requiredFields);
 
-        return true;
+    }
+
+    /**
+     * Calculate profile completion percentage (0-100).
+     */
+    public function getProfileCompletionPercent(): float
+    {
+        $requiredFields = [
+            'sponsor_id', 'username', 'name', 'first_name', 'last_name', 'email',
+            'phone', 'avatar_path', 'city', 'state_id', 'country_id', 'postal_code', 'timezone', 'best_contact_times', 'is_licensed'
+        ];
+        $filled = 0;
+        foreach ($requiredFields as $field) {
+            if ($field === 'is_licensed') {
+                if ($this->is_licensed === 0 || $this->is_licensed === 1) {
+                    $filled++;
+                }
+            } else {
+                if (!empty($this->$field)) {
+                    $filled++;
+                }
+            }
+        }
+        return round(($filled / count($requiredFields)) * 100, 2);
     }
 
     /**
@@ -321,12 +355,7 @@ class User extends Authenticatable
      */
     public function updateProfileCompletion(): bool
     {
-        $isComplete = $this->isProfileComplete();
-        
-        if ($this->profile_completed !== $isComplete) {
-            return $this->update(['profile_completed' => $isComplete]);
-        }
-
-        return true;
+        $percent = $this->getProfileCompletionPercent();
+        return $this->update(['profile_completed' => $percent]);
     }
 }

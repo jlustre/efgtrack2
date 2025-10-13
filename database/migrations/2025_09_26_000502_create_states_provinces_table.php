@@ -11,6 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->string('code')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->foreignId('country_id')->constrained()->onDelete('cascade');
             $table->string('country_code'); // ISO country code
             $table->timestamps();
             $table->unique(['code', 'country_code']);

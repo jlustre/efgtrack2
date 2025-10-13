@@ -10,6 +10,11 @@ class LogoutController
 {
     public function __invoke(Request $request, Redirector $redirect)
     {
+        $user = Auth::user();
+        if ($user) {
+            $user->is_online = false;
+            $user->save();
+        }
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

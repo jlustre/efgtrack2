@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ThemeController extends Controller
 {
@@ -30,7 +31,6 @@ class ThemeController extends Controller
     public function update(Request $request): JsonResponse
     {
         $user = Auth::user();
-        
         if (!$user) {
             return response()->json(['error' => 'Unauthenticated'], 401);
         }
@@ -40,6 +40,7 @@ class ThemeController extends Controller
             'secondary' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'accent' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
+
 
         $user->updateThemeSettings($validated);
 

@@ -213,6 +213,8 @@
             </div>
         </div>
     </div>
+
+    @livewire('profile.complete-profile-modal')
 </body>
 
 </html>

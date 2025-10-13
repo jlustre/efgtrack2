@@ -15,8 +15,10 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @livewireStyles
+
     <!-- Theme System -->
-    @include('components.theme.theme-system')
+    {{-- @include('components.theme.theme-system') --}}
 </head>
 
 <body class="font-sans antialiased">
@@ -34,9 +36,11 @@
 
         <!-- Page Content -->
         <main>
-            {{ $slot }}
+            @yield('content')
         </main>
     </div>
+
+    @livewireScripts
 </body>
 
 </html>

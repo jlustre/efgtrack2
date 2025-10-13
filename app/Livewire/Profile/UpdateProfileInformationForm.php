@@ -10,6 +10,8 @@ use Livewire\Component;
 
 class UpdateProfileInformationForm extends Component
 {
+    public $activeCountries = [];
+    public $stateOptions = [];
     public string $name = '';
     public string $first_name = '';
     public string $last_name = '';
@@ -30,22 +32,45 @@ class UpdateProfileInformationForm extends Component
      */
     public function mount(): void
     {
-        $user = $this->user;
-        
-        $this->name = $user->name;
-        $this->first_name = $user->first_name ?? '';
-        $this->last_name = $user->last_name ?? '';
-        $this->username = $user->username ?? '';
-        $this->email = $user->email;
-        $this->phone = $user->phone ?? '';
-        $this->emergency_contact = $user->emergency_contact ?? '';
-        $this->city = $user->city ?? '';
-        $this->province_state = $user->province_state ?? '';
-        $this->country = $user->country ?? '';
-        $this->timezone = $user->timezone ?? '';
-        $this->preferred_contact_method = $user->preferred_contact_method ?? 'email';
-        $this->email_notifications = $user->email_notifications ?? true;
-        $this->sms_notifications = $user->sms_notifications ?? false;
+    $user = $this->user;
+    $this->name = $user->name;
+    $this->first_name = $user->first_name ?? '';
+    $this->last_name = $user->last_name ?? '';
+    $this->username = $user->username ?? '';
+    $this->email = $user->email;
+    $this->phone = $user->phone ?? '';
+    $this->emergency_contact = $user->emergency_contact ?? '';
+    $this->city = $user->city ?? '';
+    $this->province_state = $user->province_state ?? '';
+    $this->country = $user->country ?? '';
+    $this->timezone = $user->timezone ?? '';
+    $this->preferred_contact_method = $user->preferred_contact_method ?? 'email';
+    $this->email_notifications = $user->email_notifications ?? true;
+    $this->sms_notifications = $user->sms_notifications ?? false;
+
+    // Fetch only active countries
+    $this->activeCountries = \App\Models\Country::where('is_active', true)->orderBy('name')->get(['code', 'name']);
+    // Fetch initial states for selected country
+    if ($this->country) {
+        $country = \App\Models\Country::where('code', $this->country)->first();
+        if ($country) {
+            $this->stateOptions = \App\Models\StateProvince::where('country_id', $country->id)->orderBy('name')->get(['code', 'name']);
+        } else {
+            $this->stateOptions = [];
+        }
+    }
+
+    }
+
+    public function updatedCountry($value)
+    {
+        $country = \App\Models\Country::where('code', $value)->first();
+        if ($country) {
+            $this->stateOptions = \App\Models\StateProvince::where('country_id', $country->id)->orderBy('name')->get(['code', 'name']);
+        } else {
+            $this->stateOptions = [];
+        }
+        $this->province_state = '';
     }
 
     /**
@@ -54,6 +79,7 @@ class UpdateProfileInformationForm extends Component
     public function updateProfileInformation(): void
     {
         $user = $this->user;
+        dd($user);
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -119,6 +145,9 @@ class UpdateProfileInformationForm extends Component
 
     public function render()
     {
-        return view('livewire.profile.update-profile-information-form');
+        return view('livewire.profile.update-profile-information-form', [
+            'activeCountries' => $this->activeCountries,
+            'stateOptions' => $this->stateOptions,
+        ]);
     }
 }

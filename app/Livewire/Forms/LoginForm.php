@@ -39,6 +39,15 @@ class LoginForm extends Form
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Update last login info and online status
+        $user = Auth::user();
+        if ($user) {
+            $user->last_login_at = now();
+            $user->last_login_ip = request()->ip();
+            $user->is_online = true;
+            $user->save();
+        }
     }
 
     /**

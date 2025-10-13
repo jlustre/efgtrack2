@@ -48,16 +48,11 @@ window.EFGTheme.Utils = {
             { from: 'bg-blue-500', to: 'bg-primary-500' },
             { from: 'text-blue-600', to: 'text-primary-600' },
             { from: 'text-blue-700', to: 'text-primary-700' },
-            { from: 'hover:bg-blue-700', to: 'hover:bg-primary-700' },
-            { from: 'hover:bg-blue-600', to: 'hover:bg-primary-600' },
             { from: 'border-blue-500', to: 'border-primary-500' },
-            { from: 'ring-blue-500', to: 'ring-primary-500' },
-            { from: 'focus:ring-blue-500', to: 'focus:ring-primary-500' },
-            { from: 'focus:border-blue-500', to: 'focus:border-primary-500' }
         ];
 
         colorMappings.forEach(mapping => {
-            const elements = document.querySelectorAll(`.${mapping.from}`);
+            const elements = document.querySelectorAll(`${mapping.from}`);
             elements.forEach(el => {
                 el.classList.remove(mapping.from);
                 el.classList.add(mapping.to);

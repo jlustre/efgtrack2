@@ -217,7 +217,9 @@ class CountrySeeder extends Seeder
                 ['code' => $country['code']],
                 [
                     'name' => $country['name'],
-                    'is_active' => isset($country['is_active']) ? $country['is_active'] : false
+                    'is_active' => isset($country['is_active']) ? $country['is_active'] : false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]
             );
         }

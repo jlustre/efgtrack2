@@ -16,7 +16,7 @@ $menuItems = [
 ],
 [
 'name' => 'User Management',
-'route' => '#',
+'route' => route('users.index'),
 'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0
 2.25 2.25 0 014.5 0z',
 'active' => false
@@ -61,6 +61,13 @@ $menuItems = [
 'route' => 'dashboard',
 'icon' => 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a1 1 0 00-1-1H4a1 1 0 00-1-1V7a3 3 0 013-3h10a3 3 0 013 3v1',
 'active' => request()->routeIs('dashboard')
+],
+[
+'name' => 'User Management',
+'route' => route('users.index'),
+'icon' => 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0
+2.25 2.25 0 014.5 0z',
+'active' => false
 ],
 [
 'name' => 'My Team',
@@ -277,7 +284,7 @@ $menuItems = [
                 </svg>
             </a>
             @else
-            <a href="{{ $item['route'] === '#' ? '#' : route($item['route']) }}"
+            <a href="{{ $item['route'] }}"
                 class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ $item['active'] ? 'text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} {{ $item['route'] === '#' ? 'cursor-default opacity-60' : '' }}"
                 style="{{ $item['active'] ? 'background-color: var(--primary-100);' : '' }}">
                 <svg class="mr-3 h-5 w-5 {{ $item['active'] ? '' : 'text-gray-400 group-hover:text-gray-500' }}"
@@ -421,7 +428,7 @@ $menuItems = [
                         {{ $item['name'] }}
                     </a>
                     @else
-                    <a href="{{ $item['route'] === '#' ? '#' : route($item['route']) }}"
+                    <a href="{{ $item['route'] }}"
                         class="group flex items-center px-2 py-2 text-base font-medium rounded-md {{ $item['active'] ? 'text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }} {{ $item['route'] === '#' ? 'cursor-default opacity-60' : '' }}"
                         style="{{ $item['active'] ? 'background-color: var(--primary-100);' : '' }}"
                         @click="open = false">

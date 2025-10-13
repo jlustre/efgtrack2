@@ -77,9 +77,16 @@ class StatesProvincesSeeder extends Seeder
         ];
 
         foreach ($states as $state) {
+            $country = DB::table('countries')->where('code', $state['country_code'])->first();
+            $country_id = $country ? $country->id : null;
             DB::table('states_provinces')->updateOrInsert(
                 ['code' => $state['code'], 'country_code' => $state['country_code']],
-                ['name' => $state['name']]
+                [
+                    'name' => $state['name'],
+                    'country_id' => $country_id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
             );
         }
     }

@@ -10,6 +10,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @include('components.theme-system')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
@@ -152,7 +153,7 @@
                         <div class="p-6">
                             <h3 class="text-lg font-semibold mb-4">System Management</h3>
                             <div class="space-y-3">
-                                <a href="#"
+                                <a href="{{ route('users.index') }}"
                                     class="flex items-center p-3 text-base font-medium text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group">
                                     <svg class="h-5 w-5 text-gray-500 group-hover:text-gray-900" fill="currentColor"
                                         viewBox="0 0 20 20">
@@ -227,6 +228,9 @@
             </div>
         </div>
     </div>
+
+    @livewire('profile.complete-profile-modal')
+    @livewireScripts
 </body>
 
 </html>

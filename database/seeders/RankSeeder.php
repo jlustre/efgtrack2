@@ -20,7 +20,13 @@ class RankSeeder extends Seeder
         foreach ($ranks as $rank) {
             DB::table('ranks')->updateOrInsert(
                 ['id' => $rank['id']],
-                ['name' => $rank['name'], 'code' => $rank['code'], 'level' => $rank['level']]
+                [
+                    'name' => $rank['name'],
+                    'code' => $rank['code'],
+                    'level' => $rank['level'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
             );
         }
     }

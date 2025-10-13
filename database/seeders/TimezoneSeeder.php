@@ -32,7 +32,13 @@ class TimezoneSeeder extends Seeder
         foreach ($timezones as $tz) {
             DB::table('timezones')->updateOrInsert(
                 ['name' => $tz['name']],
-                ['abbreviation' => $tz['abbreviation'], 'utc_offset' => $tz['utc_offset']]
+                [
+                    'abbreviation' => $tz['abbreviation'],
+                    'utc_offset' => $tz['utc_offset'],
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
             );
         }
     }

@@ -34,19 +34,21 @@ Route::view('terms-of-service', 'legal.terms-of-service')->name('terms-of-servic
 Route::view('cookie-policy', 'legal.cookie-policy')->name('cookie-policy');
 Route::view('contact', 'legal.contact')->name('contact');
 
-// Recruits management routes (authenticated users only)
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/recruits', App\Livewire\Recruits\Index::class)->name('recruits.index');
-    Route::get('/recruits/create', function() {
-        return view('recruits.create');
-    })->name('recruits.create');
-    Route::get('/recruits/{recruit}', function($recruit) {
-        return view('recruits.show', compact('recruit'));
-    })->name('recruits.show');
-    Route::get('/recruits/{recruit}/edit', function($recruit) {
-        return view('recruits.edit', compact('recruit'));
-    })->name('recruits.edit');
-});
+// Route::middleware(['auth', 'verified'])->group(function () {
+//     Route::get('/recruits', App\Livewire\Recruits\Index::class)->name('recruits.index');
+//     Route::get('/recruits/create', function() {
+//         return view('recruits.create');
+//     })->name('recruits.create');
+//     Route::get('/recruits/{recruit}', function($recruit) {
+//         return view('recruits.show', compact('recruit'));
+//     })->name('recruits.show');
+//     Route::get('/recruits/{recruit}/edit', function($recruit) {
+//         return view('recruits.edit', compact('recruit'));
+//     })->name('recruits.edit');
+// });
+
+// User management routes (make available globally)
+Route::resource('users', App\Http\Controllers\UserController::class)->middleware(['auth', 'verified']);
 
 // Logout route
 Route::post('logout', LogoutController::class)->name('logout');
