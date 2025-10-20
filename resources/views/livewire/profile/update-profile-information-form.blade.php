@@ -1,6 +1,7 @@
 <!-- Controller logic removed. This file is now view-only as requested. -->
 
 <section>
+    @php $profileUser = $user ?? auth()->user(); @endphp
     <header>
         <h2 class="text-lg font-medium text-gray-900">
             {{ __('Personal Information') }}
@@ -11,54 +12,55 @@
         </p>
     </header>
 
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6 drag-scroll"
+    <form wire:submit.prevent="updateProfileInformation" class="mt-6 space-y-6 drag-scroll"
         style="max-height: 600px; overflow-y: auto;">
         <!-- Error Message (inside form, above first input) -->
-        @if ($errors->any())
-        <div class="mb-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Error:</strong>
-                <span class="block sm:inline">Please fix the errors below and try again.</span>
-                <ul class="mt-2 list-disc list-inside text-sm">
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-        @elseif (session('error'))
-        <div class="mb-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Error:</strong>
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        </div>
-        @endif
+        @include('components.form-error-alert')
         <!-- Profile Picture Preview -->
-        @if($this->user->avatar_url)
         <div class="flex items-center space-x-4">
-            <img class="h-16 w-16 rounded-full object-cover" src="{{ $this->user->avatar_url }}"
-                alt="{{ $this->user->display_name }}">
+            <div class="relative">
+                <img class="h-16 w-16 rounded-full object-cover"
+                    src="{{ asset('storage/avatars/' . ($profileUser->avatar_path ?? 'default.png')) }}"
+                    alt="{{ $profileUser->display_name }}">
+                <button onclick="document.getElementById('avatar-upload-modal').classList.remove('hidden')"
+                    class="absolute -bottom-1 -right-1 bg-teal-200 border border-gray-300 rounded-full p-1 shadow hover:bg-teal-100 focus:outline-none">
+                    <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536M9 13l6.293-6.293a1 1 0 011.414 0l3.586 3.586a1 1 0 010 1.414L13 17H9v-4z" />
+                    </svg>
+                </button>
+            </div>
             <div>
-                <div class="text-sm font-medium text-gray-900">{{ $this->user->display_name }}</div>
-                <div class="text-sm text-gray-500">Current profile picture</div>
+                <div class="text-sm font-medium text-gray-900">{{ $profileUser->display_name }}</div>
+                <div class="text-sm text-gray-500">{{ __('Current profile picture') }}</div>
             </div>
         </div>
-        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
             <!-- Username -->
             <div>
                 <x-input-label for="username" :value="__('Username')" />
-                <x-text-input wire:model="username" id="username" name="username" type="text" class="mt-1 block w-full"
-                    autocomplete="username" @if(!Auth::user() || !Auth::user()->hasRole('admin')) readonly @endif />
-                    <x-input-error class="mt-2" :messages="$errors->get('username')" />
-                    <p class="mt-1 text-xs text-gray-500">
-                        Your unique username (e.g., @{{ $username ?: 'yourusername' }})<br>
-                        @if(!Auth::user() || !Auth::user()->hasRole('admin'))
-                        <span class="text-red-500">Only admins can change your username.</span>
-                        @endif
-                    </p>
+                <input wire:model.lazy="username" id="username" name="username" type="text"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    {{ $readonly }}>
+                <x-input-error class="mt-2" :messages="$errors->get('username')" />
+                @unless($isAdmin)
+                <p class="mt-1 text-xs text-gray-500">{{ __('This can only be changed by an admin.') }}</p>
+                @endunless
+            </div>
+
+            <!-- Sponsor -->
+            <div>
+                <x-input-label for="sponsor" :value="__('Sponsor')" />
+                <input type="hidden" wire:model="sponsor_id" name="sponsor_id" id="sponsor_id" />
+                <input type="text" value="{{ optional($profileUser->sponsor)->username }}"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    {{ $readonly }} />
+                <x-input-error class="mt-2" :messages="$errors->get('sponsor_id')" />
+                @unless($isAdmin)
+                <p class="mt-1 text-xs text-gray-500">{{ __('This can only be changed by an admin.') }}</p>
+                @endunless
             </div>
 
             <!-- First Name -->
@@ -83,249 +85,66 @@
                 <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required
                     autocomplete="name" />
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                <p class="mt-1 text-xs text-gray-500">How you'd like to be addressed in the system</p>
+                <p class="mt-1 text-xs text-gray-500">{{ __('How you\'d like to be addressed in the system') }}</p>
             </div>
-        </div>
 
-        <!-- Email -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required
-                autocomplete="email" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
-            @if ($this->user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $this->user->hasVerifiedEmail())
+            <!-- Email -->
             <div>
-                <p class="text-sm mt-2 text-gray-800">
-                    {{ __('Your email address is unverified.') }}
+                <x-input-label for="email" :value="__('Email')" />
+                <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required
+                    autocomplete="email" />
+                <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
-                    <button wire:click.prevent="sendVerification"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {{ __('Click here to re-send the verification email.') }}
-                    </button>
-                </p>
+                @if ($profileUser instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !
+                $profileUser->hasVerifiedEmail())
+                <div>
+                    <p class="text-sm mt-2 text-gray-800">
+                        {{ __('Your email address is unverified.') }}
 
-                @if (session('status') === 'verification-link-sent')
-                <p class="mt-2 font-medium text-sm text-green-600">
-                    {{ __('A new verification link has been sent to your email address.') }}
-                </p>
+                        <button wire:click.prevent="sendVerification"
+                            class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            {{ __('Click here to re-send the verification email.') }}
+                        </button>
+                    </p>
+
+                    @if (session('status') === 'verification-link-sent')
+                    <p class="mt-2 font-medium text-sm text-green-600">
+                        {{ __('A new verification link has been sent to your email address.') }}
+                    </p>
+                    @endif
+                </div>
                 @endif
             </div>
-            @endif
-        </div>
 
-        <!-- Contact Information -->
-        <div class="border-t border-gray-200 pt-6">
-            <h3 class="text-base font-medium text-gray-900 mb-4">Contact Information</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Phone -->
-                <div>
-                    <x-input-label for="phone" :value="__('Phone Number')" />
-                    <x-text-input wire:model="phone" id="phone" name="phone" type="tel" class="mt-1 block w-full"
-                        autocomplete="tel" />
-                    <x-input-error class="mt-2" :messages="$errors->get('phone')" />
-                </div>
-
-                <!-- Emergency Contact -->
-                <div>
-                    <x-input-label for="emergency_contact" :value="__('Emergency Contact')" />
-                    <x-text-input wire:model="emergency_contact" id="emergency_contact" name="emergency_contact"
-                        type="text" class="mt-1 block w-full" />
-                    <x-input-error class="mt-2" :messages="$errors->get('emergency_contact')" />
-                    <p class="mt-1 text-xs text-gray-500">Name and phone number</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Location Information -->
-        <div class="border-t border-gray-200 pt-6">
-            <h3 class="text-base font-medium text-gray-900 mb-4">Location</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- City -->
-                <div>
-                    <x-input-label for="city" :value="__('City')" />
-                    <x-text-input wire:model="city" id="city" name="city" type="text" class="mt-1 block w-full"
-                        autocomplete="address-level2" />
-                    <x-input-error class="mt-2" :messages="$errors->get('city')" />
-                </div>
-
-                <!-- Province/State -->
-                <div>
-                    <x-input-label for="province_state" :value="__('Province/State')" />
-                    <x-text-input wire:model="province_state" id="province_state" name="province_state" type="text"
-                        class="mt-1 block w-full" autocomplete="address-level1" />
-                    <x-input-error class="mt-2" :messages="$errors->get('province_state')" />
-                </div>
-
-                <!-- Country -->
-                <div>
-                    <x-input-label for="country" :value="__('Country')" />
-                    <div>
-                        <select x-model="selectedCountry" wire:model="country" id="country" name="country"
-                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            <option value="">Select Country</option>
-                            @foreach($activeCountries as $country)
-                            <option value="{{ $country->code }}">{{ $country->name }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('country')" />
-                        <!-- Province/State -->
-                        <x-input-label for="province_state" :value="__('Province/State')" class="mt-4" />
-                        <select wire:model="province_state" id="province_state" name="province_state"
-                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            <option value="">Select State/Province</option>
-                            @foreach($stateOptions as $state)
-                            <option value="{{ $state->code }}">{{ $state->name }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('province_state')" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preferences -->
-        <div class="border-t border-gray-200 pt-6">
-            <h3 class="text-base font-medium text-gray-900 mb-4">Preferences</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Timezone -->
-                <div>
-                    <x-input-label for="timezone" :value="__('Timezone')" />
-                    <select wire:model="timezone" id="timezone" name="timezone"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        <option value="">Select Timezone</option>
-                        <option value="America/Toronto">Eastern Time (Toronto)</option>
-                        <option value="America/Vancouver">Pacific Time (Vancouver)</option>
-                        <option value="America/New_York">Eastern Time (New York)</option>
-                        <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
-                        <option value="Europe/London">GMT (London)</option>
-                        <option value="Europe/Paris">CET (Paris)</option>
-                        <option value="Asia/Tokyo">JST (Tokyo)</option>
-                        <option value="Australia/Sydney">AEST (Sydney)</option>
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
-                </div>
-
-                <!-- Preferred Contact Method -->
-                <div>
-                    <x-input-label for="preferred_contact_method" :value="__('Preferred Contact Method')" />
-                    <select wire:model="preferred_contact_method" id="preferred_contact_method"
-                        name="preferred_contact_method"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        <option value="email">Email</option>
-                        <option value="phone">Phone</option>
-                        <option value="both">Both Email and Phone</option>
-                    </select>
-                    <x-input-error class="mt-2" :messages="$errors->get('preferred_contact_method')" />
-                </div>
+            <!-- Phone -->
+            <div>
+                <x-input-label for="phone" :value="__('Phone Number')" />
+                <x-text-input wire:model="phone" id="phone" name="phone" type="tel" class="mt-1 block w-full"
+                    autocomplete="tel" />
+                <x-input-error class="mt-2" :messages="$errors->get('phone')" />
             </div>
 
-            <!-- Communication Preferences -->
-            <div class="mt-6">
-                <fieldset>
-                    <legend class="text-sm font-medium text-gray-900">Communication Preferences</legend>
-                    <div class="mt-2 space-y-3">
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input wire:model="email_notifications" id="email_notifications"
-                                    name="email_notifications" type="checkbox"
-                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="email_notifications" class="font-medium text-gray-700">Email
-                                    Notifications</label>
-                                <p class="text-gray-500">Receive updates about recruits, mentorships, and system
-                                    notifications via email.</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input wire:model="sms_notifications" id="sms_notifications" name="sms_notifications"
-                                    type="checkbox"
-                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="sms_notifications" class="font-medium text-gray-700">SMS
-                                    Notifications</label>
-                                <p class="text-gray-500">Receive urgent notifications via SMS (requires phone number).
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
+            <!-- Best Contact Times -->
+            <div>
+                <x-input-label for="best_contact_times" :value="__('Best Contact Times (Based on timezone)')" />
+                <select wire:model="best_contact_times" id="best_contact_times" name="best_contact_times"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                    <option value="">{{ __('Select a time block') }}</option>
+                    @include('components.best-contact-times-options')
+                </select>
+                <x-input-error class="mt-2" :messages="$errors->get('best_contact_times')" />
             </div>
         </div>
-
-        <!-- Membership Information (Read-only) -->
-        @if($this->user->sponsor_id || $this->user->member_since)
-        <div class="border-t border-gray-200 pt-6">
-            <h3 class="text-base font-medium text-gray-900 mb-4">Membership Information</h3>
-
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <dl class="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
-                    @if($this->user->sponsor)
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Sponsored by</dt>
-                        <dd class="text-sm text-gray-900">{{ $this->user->sponsor->display_name }} ({{
-                            '@'. $this->user->sponsor->username }})</dd>
-                    </div>
-                    @endif
-
-                    @if($this->user->member_since)
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Member Since</dt>
-                        <dd class="text-sm text-gray-900">{{ $this->user->member_since->format('F j, Y') }}</dd>
-                    </div>
-                    @endif
-
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Member Status</dt>
-                        <dd class="text-sm">
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $this->user->member_status_color }}-100 text-{{ $this->user->member_status_color }}-800">
-                                {{ $this->user->member_status_label }}
-                            </span>
-                        </dd>
-                    </div>
-
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">Profile Completion</dt>
-                        <dd class="text-sm text-gray-900">
-                            {{ $this->user->isProfileComplete() ? 'Complete' : 'Incomplete' }}
-                            ({{ $this->user->isProfileComplete() ? 100 : 60 }}%)
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-        </div>
-        @endif
-
-        <!-- Error Message -->
-        @if ($errors->any())
-        <div class="mb-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Error:</strong>
-                <span class="block sm:inline">Please fix the errors below and try again.</span>
-                <ul class="mt-2 list-disc list-inside text-sm">
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-        @endif
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-4 pt-6 border-t border-gray-200">
             <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
 
-            <x-action-message class="me-3" on="profile-updated">
-                {{ __('Saved.') }}
-            </x-action-message>
+            <!-- Inline Alpine fallback in case browser events don't reach the action-message -->
+            <div x-data="{ show: @entangle('showSuccess') }" x-show="show" x-transition x-cloak
+                class="text-sm text-green-600 font-medium">
+                {{ __('Personal Info Saved.') }}
+            </div>
         </div>
     </form>
     <script>

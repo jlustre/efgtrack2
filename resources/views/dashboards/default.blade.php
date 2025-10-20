@@ -13,8 +13,8 @@
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
-    <!-- Include Sidebar -->
-    <x-dashboard-sidebar :user="$user" :viewingContext="$viewingContext ?? null" />
+    <!-- Include Sidebar (Livewire layout.navigation) -->
+    <livewire:layout.navigation :user="$user ?? auth()->user()" :viewingContext="$viewingContext ?? null" />
 
     <!-- Main Content -->
     <div class="md:pl-64 flex flex-col flex-1">
@@ -40,7 +40,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h3 class="mt-2 text-lg font-medium text-gray-900">Welcome, {{ $user->name }}!</h3>
+                            <h3 class="mt-2 text-lg font-medium text-gray-900">Welcome, {{ ($user ??
+                                auth()->user())->name }}!</h3>
                             <p class="mt-2 text-sm text-gray-500">
                                 Your account is being set up. You'll be assigned a role soon to access specific
                                 features.

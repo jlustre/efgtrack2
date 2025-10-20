@@ -14,8 +14,8 @@ return new class extends Migration {
             $table->string('first_name')->nullable(); 
             $table->string('last_name')->nullable(); 
             $table->string('username')->unique()->nullable();
-            $table->foreignId('sponsor_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('rank_id')->constrained('ranks')->onDelete('cascade')->default(1);
+            $table->foreignId('sponsor_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('rank_id')->nullable()->constrained('ranks')->onDelete('cascade')->default(1);
             $table->foreignId('assigned_mentor_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('assigned_manager_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('email')->unique();

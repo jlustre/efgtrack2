@@ -20,42 +20,29 @@
                 <x-input-error class="mt-2" :messages="$errors->get('city')" />
             </div>
 
-            <!-- Province/State -->
-            <div>
-                <x-input-label for="province_state" :value="__('Province/State')" />
-                <x-text-input wire:model="province_state" id="province_state" name="province_state" type="text"
-                    class="mt-1 block w-full" autocomplete="address-level1" />
-                <x-input-error class="mt-2" :messages="$errors->get('province_state')" />
-            </div>
 
             <!-- Country -->
             <div>
-                <x-input-label for="country" :value="__('Country')" />
-                <select wire:model="country" id="country" name="country"
-                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                    <option value="">Select Country</option>
-                    <option value="CA">Canada</option>
-                    <option value="US">United States</option>
-                    <option value="GB">United Kingdom</option>
-                    <option value="AU">Australia</option>
-                    <option value="DE">Germany</option>
-                    <option value="FR">France</option>
-                    <option value="JP">Japan</option>
-                    <option value="CN">China</option>
-                    <option value="IN">India</option>
-                    <option value="BR">Brazil</option>
-                    <option value="MX">Mexico</option>
-                    <option value="ES">Spain</option>
-                    <option value="IT">Italy</option>
-                    <option value="NL">Netherlands</option>
-                    <option value="SE">Sweden</option>
-                    <option value="NO">Norway</option>
-                    <option value="DK">Denmark</option>
-                    <option value="FI">Finland</option>
-                    <option value="CH">Switzerland</option>
-                    <option value="AT">Austria</option>
+                <label class="block text-sm font-medium text-gray-700">{{ __('Country') }}</label>
+                <select wire:model="country_id" wire:change="updateStatesForCountry"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                    <option value="">{{ __('Select a country') }}</option>
+                    @foreach($activeCountries as $country)
+                    <option value="{{ (int) $country->id }}">{{ $country->name }}</option>
+                    @endforeach
                 </select>
-                <x-input-error class="mt-2" :messages="$errors->get('country')" />
+                @error('form.country_id')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ __('State/Province') }}</label>
+                <select wire:model="state_id" wire:key="states-{{ $country_id }}"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200">
+                    <option value="">{{ __('Select a state/province') }}</option>
+                    @foreach($states as $state)
+                    <option value="{{ $state->id }}">{{ $state->name }}</option>
+                    @endforeach
+                </select>
+                @error('state_id')<span class="text-red-500 text-xs">{{ $message }}</span>@enderror
             </div>
         </div>
 
@@ -64,7 +51,7 @@
             <x-input-label for="timezone" :value="__('Timezone')" />
             <select wire:model="timezone" id="timezone" name="timezone"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                <option value="">Select Timezone</option>
+                <option value="">{{ __('Select Timezone') }}</option>
 
                 <!-- North America -->
                 <optgroup label="North America">
@@ -114,10 +101,35 @@
                 </optgroup>
             </select>
             <x-input-error class="mt-2" :messages="$errors->get('timezone')" />
-            <p class="mt-1 text-xs text-gray-500">This helps us show times in your local timezone</p>
+            <p class="mt-1 text-xs text-gray-500">{{ __('This helps us show times in your local timezone') }}</p>
         </div>
 
-        @if($city || $province_state || $country)
+        @php
+        // Safely resolve display names for country and state from the loaded lists
+        $countryName = null;
+        $stateName = null;
+
+        if (!empty($country_id) && isset($activeCountries)) {
+        // $activeCountries may be a Collection or array of models/objects
+        try {
+        $countryItem = collect($activeCountries)->firstWhere('id', (int) $country_id);
+        $countryName = $countryItem->name ?? null;
+        } catch (\Throwable $e) {
+        $countryName = null;
+        }
+        }
+
+        if (!empty($state_id) && isset($states)) {
+        try {
+        $stateItem = collect($states)->firstWhere('id', (int) $state_id);
+        $stateName = $stateItem->name ?? null;
+        } catch (\Throwable $e) {
+        $stateName = null;
+        }
+        }
+        @endphp
+
+        @if($city || $stateName || $countryName)
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div class="flex">
                 <svg class="h-5 w-5 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,9 +139,9 @@
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
                 <div>
-                    <h4 class="text-sm font-medium text-blue-800">Current Location</h4>
+                    <h4 class="text-sm font-medium text-blue-800">{{ __('Current Location') }}</h4>
                     <p class="text-sm text-blue-700 mt-1">
-                        {{ collect([$city, $province_state, $country])->filter()->implode(', ') }}
+                        {{ collect([$city, $stateName, $countryName])->filter()->implode(', ') }}
                     </p>
                 </div>
             </div>
@@ -140,7 +152,7 @@
         <div class="flex items-center gap-4 pt-6 border-t border-gray-200">
             <x-primary-button>{{ __('Update Location') }}</x-primary-button>
 
-            <x-action-message class="me-3" on="location-updated">
+            <x-action-message class="me-3 text-green-600" on="location-updated">
                 {{ __('Location updated successfully.') }}
             </x-action-message>
         </div>

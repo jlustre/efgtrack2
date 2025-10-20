@@ -10,7 +10,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                Add New Recruit
+                {{ __('Add New Recruit') }}
             </a>
         </div>
     </x-slot>
@@ -23,7 +23,8 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <!-- Search -->
                         <div class="relative">
-                            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search recruits..."
+                            <input type="text" wire:model.live.debounce.300ms="search"
+                                placeholder="{{ __('Search recruits...') }}"
                                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
@@ -38,15 +39,15 @@
                         <div>
                             <select wire:model.live="statusFilter"
                                 class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                                <option value="">All Statuses</option>
-                                <option value="prospect">Prospect</option>
-                                <option value="applied">Applied</option>
-                                <option value="interviewing">Interviewing</option>
-                                <option value="onboarding">Onboarding</option>
-                                <option value="training">In Training</option>
-                                <option value="licensed">Licensed</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="">{{ __('All Statuses') }}</option>
+                                <option value="prospect">{{ __('Prospect') }}</option>
+                                <option value="applied">{{ __('Applied') }}</option>
+                                <option value="interviewing">{{ __('Interviewing') }}</option>
+                                <option value="onboarding">{{ __('Onboarding') }}</option>
+                                <option value="training">{{ __('In Training') }}</option>
+                                <option value="licensed">{{ __('Licensed') }}</option>
+                                <option value="active">{{ __('Active') }}</option>
+                                <option value="inactive">{{ __('Inactive') }}</option>
                             </select>
                         </div>
 
@@ -54,7 +55,7 @@
                         <div>
                             <select wire:model.live="mentorFilter"
                                 class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
-                                <option value="">All Mentors</option>
+                                <option value="">{{ __('All Mentors') }}</option>
                                 @foreach($mentors as $mentor)
                                 <option value="{{ $mentor->id }}">{{ $mentor->name }}</option>
                                 @endforeach
@@ -65,7 +66,7 @@
                         <div class="flex items-end">
                             <button wire:click="clearFilters"
                                 class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition duration-200">
-                                Clear Filters
+                                {{ __('Clear Filters') }}
                             </button>
                         </div>
                     </div>
@@ -88,7 +89,7 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-500">Total Recruits</div>
+                                <div class="text-sm font-medium text-gray-500">{{ __('Total Recruits') }}</div>
                                 <div class="text-2xl font-bold text-gray-900">{{ $recruits->total() }}</div>
                             </div>
                         </div>
@@ -108,7 +109,7 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-500">Active</div>
+                                <div class="text-sm font-medium text-gray-500">{{ __('Active') }}</div>
                                 <div class="text-2xl font-bold text-gray-900">
                                     {{ \App\Models\Recruit::where('status', 'active')->count() }}
                                 </div>
@@ -130,7 +131,7 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-500">In Training</div>
+                                <div class="text-sm font-medium text-gray-500">{{ __('In Training') }}</div>
                                 <div class="text-2xl font-bold text-gray-900">
                                     {{ \App\Models\Recruit::whereIn('status', ['onboarding', 'training'])->count() }}
                                 </div>
@@ -153,7 +154,7 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-500">Licensed</div>
+                                <div class="text-sm font-medium text-gray-500">{{ __('Licensed') }}</div>
                                 <div class="text-2xl font-bold text-gray-900">
                                     {{ \App\Models\Recruit::where('status', 'licensed')->count() }}
                                 </div>
@@ -172,7 +173,7 @@
                                 <th wire:click="sortBy('first_name')"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                                     <div class="flex items-center space-x-1">
-                                        <span>Name</span>
+                                        <span>{{ __('Name') }}</span>
                                         @if($sortField === 'first_name')
                                         <svg class="h-4 w-4 {{ $sortDirection === 'asc' ? 'transform rotate-180' : '' }}"
                                             fill="currentColor" viewBox="0 0 20 20">
@@ -184,11 +185,11 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Email</th>
+                                    {{ __('Email') }}</th>
                                 <th wire:click="sortBy('status')"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                                     <div class="flex items-center space-x-1">
-                                        <span>Status</span>
+                                        <span>{{ __('Status') }}</span>
                                         @if($sortField === 'status')
                                         <svg class="h-4 w-4 {{ $sortDirection === 'asc' ? 'transform rotate-180' : '' }}"
                                             fill="currentColor" viewBox="0 0 20 20">
@@ -200,14 +201,14 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Mentor</th>
+                                    {{ __('Mentor') }}</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Progress</th>
+                                    {{ __('Progress') }}</th>
                                 <th wire:click="sortBy('created_at')"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                                     <div class="flex items-center space-x-1">
-                                        <span>Created</span>
+                                        <span>{{ __('Created') }}</span>
                                         @if($sortField === 'created_at')
                                         <svg class="h-4 w-4 {{ $sortDirection === 'asc' ? 'transform rotate-180' : '' }}"
                                             fill="currentColor" viewBox="0 0 20 20">
@@ -219,7 +220,7 @@
                                 </th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions</th>
+                                    {{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">

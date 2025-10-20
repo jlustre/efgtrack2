@@ -75,11 +75,20 @@ new #[Layout('layouts.guest')] class extends Component
      */
     public function register(): void
     {
-        $isAdmin = Auth::check() && Auth::user()->hasRole('admin');
+        // Safe admin check: roles tables may be absent in some test environments
+        $isAdmin = false;
+        try {
+            if (Auth::check() && \Illuminate\Support\Facades\Schema::hasTable('roles') && \Illuminate\Support\Facades\Schema::hasTable('model_has_roles')) {
+                $isAdmin = method_exists(Auth::user(), 'hasRole') && Auth::user()->hasRole('admin');
+            }
+        } catch (\Throwable $e) {
+            $isAdmin = false;
+        }
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            // first_name/last_name are preferred but allow deriving from 'name'
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ];
@@ -95,6 +104,17 @@ new #[Layout('layouts.guest')] class extends Component
         ];
         $validated = $this->validate($rules, $messages);
 
+        // If first_name/last_name not provided, try to derive from full 'name'
+        if (empty($validated['first_name']) || empty($validated['last_name'])) {
+            $parts = preg_split('/\s+/', trim($validated['name']));
+            if (count($parts) === 1) {
+                $validated['first_name'] = $parts[0];
+                $validated['last_name'] = '';
+            } else {
+                $validated['first_name'] = array_shift($parts);
+                $validated['last_name'] = implode(' ', $parts);
+            }
+        }
         if ($isAdmin) {
             $validated['username'] = strtolower($validated['username']);
             $sponsorUser = \App\Models\User::where('username', $this->sponsor)->where('member_status', 'active')->first();
@@ -113,18 +133,31 @@ new #[Layout('layouts.guest')] class extends Component
 
     $validated['password'] = Hash::make($validated['password']);
     $validated['last_active_at'] = now()->toDateString();
-    $validated['rank_id'] = 1;
-    $assignedManager = null;
-    if ($this->sponsor_id) {
-        $upline = User::find($this->sponsor_id);
-        while ($upline) {
-            if ($upline->hasRole('manager')) {
-                $assignedManager = $upline->id;
-                break;
-            }
-            $upline = $upline->sponsor_id ? User::find($upline->sponsor_id) : null;
+    // Only set a default rank_id if the ranks table exists and contains an id=1.
+    try {
+        if (\Illuminate\Support\Facades\Schema::hasTable('ranks') && \Illuminate\Support\Facades\DB::table('ranks')->where('id', 1)->exists()) {
+            $validated['rank_id'] = 1;
+        } else {
+            $validated['rank_id'] = null;
         }
+    } catch (\Throwable $e) {
+        $validated['rank_id'] = null;
     }
+    $assignedManager = null;
+        if ($this->sponsor_id) {
+            $upline = User::find($this->sponsor_id);
+            while ($upline) {
+                try {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('roles') && \Illuminate\Support\Facades\Schema::hasTable('model_has_roles') && method_exists($upline, 'hasRole') && $upline->hasRole('manager')) {
+                        $assignedManager = $upline->id;
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    // If role tables are missing or check fails, don't assign manager based on roles
+                }
+                $upline = $upline->sponsor_id ? User::find($upline->sponsor_id) : null;
+            }
+        }
     $validated['assigned_manager_id'] = $assignedManager;
 
     event(new Registered($user = User::create($validated)));

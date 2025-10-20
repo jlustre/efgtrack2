@@ -36,16 +36,17 @@ class AvatarUpload extends Component
         $user = $this->user;
 
         // Delete old avatar if it exists and is not the default
-        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
-            Storage::disk('public')->delete($user->avatar_path);
+        if ($user->avatar_path && Storage::disk('public')->exists('avatars/' . $user->avatar_path)) {
+            Storage::disk('public')->delete('avatars/' . $user->avatar_path);
         }
 
-        // Store the new avatar
+        // Store the new avatar into 'avatars' folder on public disk and save only the filename
         $path = $this->avatar->store('avatars', 'public');
+        $filename = basename($path);
 
-        // Update user record
+        // Update user record with normalized filename
         $user->update([
-            'avatar_path' => $path,
+            'avatar_path' => $filename,
         ]);
 
         // Update component state
@@ -65,8 +66,8 @@ class AvatarUpload extends Component
         $user = $this->user;
 
         // Delete avatar file if it exists
-        if ($user->avatar_path && Storage::disk('public')->exists($user->avatar_path)) {
-            Storage::disk('public')->delete($user->avatar_path);
+        if ($user->avatar_path && Storage::disk('public')->exists('avatars/' . $user->avatar_path)) {
+            Storage::disk('public')->delete('avatars/' . $user->avatar_path);
         }
 
         // Clear avatar path from user

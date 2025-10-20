@@ -408,3 +408,21 @@ Contains all the UI interaction functions for the enhanced theme system
         }, 5000);
     }
 </script>
+
+<script>
+    // Expose a simple UI object expected by theme-init
+    window.EFGTheme = window.EFGTheme || {};
+    // Provide a minimal UI surface so other scripts can call .init()
+    window.EFGTheme.UI = window.EFGTheme.UI || {
+        init: function() {
+            try {
+                // Call the existing functions defined above to initialize the UI
+                if (typeof initializeThemePanel === 'function') initializeThemePanel();
+                if (typeof loadSavedTheme === 'function') loadSavedTheme();
+                if (typeof initializeColorPickers === 'function') initializeColorPickers();
+            } catch (e) {
+                console.error('EFGTheme.UI.init error', e);
+            }
+        }
+    };
+</script>

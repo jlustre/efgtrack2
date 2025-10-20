@@ -12,8 +12,8 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        $user = Auth::user();
-        return view('livewire.profile.update-profile-information-form', compact('user'));
+        // Return the main profile page with tabs; the Livewire components will mount themselves
+        return view('profile');
     }
 
     public function update(Request $request)
@@ -48,5 +48,12 @@ class ProfileController extends Controller
         $user->sendEmailVerificationNotification();
         Session::flash('status', 'verification-link-sent');
         return redirect()->back();
+    }
+    /**
+     * Show the settings page.
+     */
+    public function settings()
+    {
+        return view('settings');
     }
 }

@@ -28,6 +28,18 @@ class CompleteProfileModal extends Component
     public $percent = 0;
     public $success = false;
 
+    // Allow other components to open this modal explicitly
+    protected $listeners = [
+        'hideModal' => 'closeModal',
+        'openModal' => 'openModal',
+    ];
+
+    public function openModal()
+    {
+        $this->success = false;
+        $this->show = true;
+    }
+
     public function hideSuccessMessage()
     {
         $this->success = false;
@@ -54,9 +66,9 @@ class CompleteProfileModal extends Component
         foreach ($this->fields as $field) {
             $this->form[$field] = $this->user->$field;
         }
-        // If avatar_path is a string (not a file upload), reset form value so Blade uses $user->avatar_path for preview
-        if (!empty($this->form['avatar_path']) && is_string($this->form['avatar_path'])) {
-            $this->form['avatar_path'] = null;
+        // Always set avatar_path to the database value if it is a string (filename)
+        if (is_string($this->user->avatar_path) && !empty($this->user->avatar_path)) {
+            $this->form['avatar_path'] = $this->user->avatar_path;
         }
         // Get sponsor username if sponsor_id exists
         if ($this->user->sponsor_id) {
@@ -72,10 +84,18 @@ class CompleteProfileModal extends Component
         // Get active timezones for dropdown
     $this->timezones = DB::table('timezones')->where('is_active', true)->orderBy('name')->get();
         $this->percent = $this->user->getProfileCompletionPercent();
-        $this->show = $this->percent < 100;
+
+        // Only auto-show the modal when the user is on the dashboard page.
+        // Avoid auto-opening the modal on other pages like the profile edit page.
+        try {
+            $this->show = ($this->percent < 100) && request()->routeIs('dashboard');
+        } catch (\Throwable $e) {
+            // If route helper isn't available for some reason, default to not showing.
+            $this->show = false;
+        }
     }
 
-    public function updatedFormCountryId()
+    public function updateStatesForCountry()
     {
         $countryId = $this->form['country_id'];
         $this->states = $countryId
@@ -126,17 +146,21 @@ class CompleteProfileModal extends Component
         }
         $validated = Validator::make($this->form, $rules)->validate();
         // Handle avatar upload and store only filename
+        // Don't overwrite sponsor_id with null if it's not provided (protect NOT NULL DB column)
+        if (array_key_exists('sponsor_id', $validated) && ($validated['sponsor_id'] === null || $validated['sponsor_id'] === '')) {
+            unset($validated['sponsor_id']);
+        }
         if (!empty($this->form['avatar_path']) && is_object($this->form['avatar_path'])) {
             $avatarPath = $this->form['avatar_path']->store('avatars', 'public');
             $filename = basename($avatarPath);
             $validated['avatar_path'] = $filename;
-            \Log::info('[Livewire Debug] avatar_path to save: ' . $filename);
+            \Illuminate\Support\Facades\Log::info('[Livewire Debug] avatar_path to save: ' . $filename);
         }
     $this->user->fill($validated);
     $this->user->updateProfileCompletion();
     $this->user->save();
     $this->user = $this->user->fresh(); // Reload user from DB for updated avatar_path
-    \Log::info('[Livewire Debug] user->avatar_path after save: ' . $this->user->avatar_path);
+    \Illuminate\Support\Facades\Log::info('[Livewire Debug] user->avatar_path after save: ' . $this->user->avatar_path);
     $this->form['avatar_path'] = $this->user->avatar_path; // Sync form for persistent preview
     $this->percent = $this->user->getProfileCompletionPercent();
     $this->show = $this->percent < 100;

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Contact Us - EFGTrack</title>
+    <title>{{ __('Contact Us') }} - EFGTrack</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -31,8 +31,8 @@
                 </div>
                 <div class="flex items-center">
                     <a href="{{ route('landing') }}"
-                        class="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium">← Back to
-                        Home</a>
+                        class="text-blue-600 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium">{{ __('← Back
+                        to Home') }}</a>
                 </div>
             </div>
         </div>
@@ -41,16 +41,16 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ __('Contact Us') }}</h1>
             <p class="text-xl text-gray-600 max-w-2xl mx-auto">
-                We're here to help! Get in touch with our team for support, questions, or feedback.
+                {{ __('We\'re here to help! Get in touch with our team for support, questions, or feedback.') }}
             </p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <!-- Contact Information -->
             <div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-8">Get in Touch</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-8">{{ __('Get in Touch') }}</h2>
 
                 <!-- Contact Methods -->
                 <div class="space-y-8">
@@ -65,8 +65,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900">General Support</h3>
-                            <p class="text-gray-600">For general questions and platform support</p>
+                            <h3 class="text-lg font-medium text-gray-900">{{ __('General Support') }}</h3>
+                            <p class="text-gray-600">{{ __('For general questions and platform support') }}</p>
                             <p class="text-blue-600 font-medium">support@efgtrack.com</p>
                         </div>
                     </div>
@@ -82,8 +82,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900">Sales Inquiries</h3>
-                            <p class="text-gray-600">Interested in EFGTrack for your organization?</p>
+                            <h3 class="text-lg font-medium text-gray-900">{{ __('Sales Inquiries') }}</h3>
+                            <p class="text-gray-600">{{ __('Interested in EFGTrack for your organization?') }}</p>
                             <p class="text-green-600 font-medium">sales@efgtrack.com</p>
                         </div>
                     </div>
@@ -101,8 +101,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900">Technical Support</h3>
-                            <p class="text-gray-600">Having technical issues or bugs to report?</p>
+                            <h3 class="text-lg font-medium text-gray-900">{{ __('Technical Support') }}</h3>
+                            <p class="text-gray-600">{{ __('Having technical issues or bugs to report?') }}</p>
                             <p class="text-purple-600 font-medium">technical@efgtrack.com</p>
                         </div>
                     </div>
@@ -118,8 +118,8 @@
                             </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900">Privacy & Legal</h3>
-                            <p class="text-gray-600">Privacy concerns or legal inquiries</p>
+                            <h3 class="text-lg font-medium text-gray-900">{{ __('Privacy & Legal') }}</h3>
+                            <p class="text-gray-600">{{ __('Privacy concerns or legal inquiries') }}</p>
                             <p class="text-gray-600 font-medium">legal@efgtrack.com</p>
                         </div>
                     </div>
@@ -127,79 +127,83 @@
 
                 <!-- Office Information -->
                 <div class="mt-12 p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Office Location</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Office Location') }}</h3>
                     <div class="text-gray-600">
-                        <p><strong>EFGTrack Headquarters</strong></p>
+                        <p><strong>{{ __('EFGTrack Headquarters') }}</strong></p>
                         <p>123 Business Ave, Suite 100</p>
                         <p>Financial District, NY 10001</p>
-                        <p class="mt-2"><strong>Phone:</strong> (555) 123-4567</p>
-                        <p><strong>Business Hours:</strong> Mon-Fri, 9:00 AM - 6:00 PM EST</p>
+                        <p class="mt-2"><strong>{{ __('Phone:') }}</strong> (555) 123-4567</p>
+                        <p><strong>{{ __('Business Hours:') }}</strong> {{ __('Mon-Fri, 9:00 AM - 6:00 PM EST') }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Contact Form -->
             <div class="bg-white rounded-lg shadow-sm p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ __('Send us a Message') }}</h2>
 
                 <form class="space-y-6">
                     <!-- Name -->
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Full Name *')
+                            }}</label>
                         <input type="text" id="name" name="name" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email Address *')
+                            }}</label>
                         <input type="email" id="email" name="email" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
                     <!-- Organization -->
                     <div>
-                        <label for="organization"
-                            class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                        <label for="organization" class="block text-sm font-medium text-gray-700 mb-1">{{
+                            __('Organization') }}</label>
                         <input type="text" id="organization" name="organization"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
                     <!-- Subject -->
                     <div>
-                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
+                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Subject *')
+                            }}</label>
                         <select id="subject" name="subject" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Select a subject</option>
-                            <option value="general">General Inquiry</option>
-                            <option value="support">Technical Support</option>
-                            <option value="sales">Sales Inquiry</option>
-                            <option value="billing">Billing Question</option>
-                            <option value="feature">Feature Request</option>
-                            <option value="bug">Bug Report</option>
-                            <option value="other">Other</option>
+                            <option value="">{{ __('Select a subject') }}</option>
+                            <option value="general">{{ __('General Inquiry') }}</option>
+                            <option value="support">{{ __('Technical Support') }}</option>
+                            <option value="sales">{{ __('Sales Inquiry') }}</option>
+                            <option value="billing">{{ __('Billing Question') }}</option>
+                            <option value="feature">{{ __('Feature Request') }}</option>
+                            <option value="bug">{{ __('Bug Report') }}</option>
+                            <option value="other">{{ __('Other') }}</option>
                         </select>
                     </div>
 
                     <!-- Message -->
                     <div>
-                        <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Message *')
+                            }}</label>
                         <textarea id="message" name="message" rows="6" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Please provide as much detail as possible..."></textarea>
+                            placeholder="{{ __('Please provide as much detail as possible...') }}"></textarea>
                     </div>
 
                     <!-- Submit Button -->
                     <div>
                         <button type="submit"
                             class="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition duration-200 font-medium">
-                            Send Message
+                            {{ __('Send Message') }}
                         </button>
                     </div>
 
                     <!-- Note -->
                     <p class="text-sm text-gray-500 text-center">
-                        We'll get back to you within 24 hours during business days.
+                        {{ __('We\'ll get back to you within 24 hours during business days.') }}
                     </p>
                 </form>
             </div>

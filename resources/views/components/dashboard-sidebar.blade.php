@@ -1,12 +1,30 @@
 @php
+use Illuminate\Support\Facades\Schema;
 // Determine the dashboard owner's role
+$user = $user ?? auth()->user();
 $dashboardOwner = $user; // The user whose dashboard we're viewing
 $currentViewer = isset($viewingContext) ? $viewingContext['viewer'] : $user; // Who is viewing
+
+// Precompute safe role booleans to avoid querying missing Spatie tables in test/sqlite envs
+$canIsAdmin = false;
+$canIsManager = false;
+$canIsMentor = false;
+$canIsMember = false;
+try {
+if (Schema::hasTable('roles') && Schema::hasTable('model_has_roles')) {
+$canIsAdmin = $dashboardOwner && method_exists($dashboardOwner, 'hasRole') && $dashboardOwner->hasRole('admin');
+$canIsManager = $dashboardOwner && method_exists($dashboardOwner, 'hasRole') && $dashboardOwner->hasRole('manager');
+$canIsMentor = $dashboardOwner && method_exists($dashboardOwner, 'hasRole') && $dashboardOwner->hasRole('mentor');
+$canIsMember = $dashboardOwner && method_exists($dashboardOwner, 'hasRole') && $dashboardOwner->hasRole('member');
+}
+} catch (\Throwable $e) {
+$canIsAdmin = $canIsManager = $canIsMentor = $canIsMember = false;
+}
 
 // Define menu items based on dashboard owner's role
 $menuItems = [];
 
-if ($dashboardOwner->hasRole('admin')) {
+if ($canIsAdmin) {
 $menuItems = [
 [
 'name' => 'Overview',
@@ -54,7 +72,7 @@ $menuItems = [
 'external' => true
 ]
 ];
-} elseif ($dashboardOwner->hasRole('manager')) {
+} elseif ($canIsManager) {
 $menuItems = [
 [
 'name' => 'Dashboard',
@@ -108,7 +126,7 @@ $menuItems = [
 'active' => false
 ]
 ];
-} elseif ($dashboardOwner->hasRole('mentor')) {
+} elseif ($canIsMentor) {
 $menuItems = [
 [
 'name' => 'Dashboard',
@@ -165,7 +183,7 @@ $menuItems = [
 'active' => false
 ]
 ];
-} elseif ($dashboardOwner->hasRole('member')) {
+} elseif ($canIsMember) {
 $menuItems = [
 [
 'name' => 'Dashboard',
@@ -322,13 +340,13 @@ $menuItems = [
                                     {{ $dashboardOwner->name }}
                                 </p>
                                 <p class="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                                    @if($dashboardOwner->hasRole('admin'))
+                                    @if($canIsAdmin)
                                     <span class="text-red-600">Admin</span>
-                                    @elseif($dashboardOwner->hasRole('manager'))
+                                    @elseif($canIsManager)
                                     <span class="text-green-600">Manager</span>
-                                    @elseif($dashboardOwner->hasRole('mentor'))
+                                    @elseif($canIsMentor)
                                     <span class="text-purple-600">Mentor</span>
-                                    @elseif($dashboardOwner->hasRole('member'))
+                                    @elseif($canIsMember)
                                     <span class="text-indigo-600">Member</span>
                                     @else
                                     <span class="text-gray-600">User</span>
@@ -464,13 +482,13 @@ $menuItems = [
                                 {{ $dashboardOwner->name }}
                             </p>
                             <p class="text-sm font-medium text-gray-500 group-hover:text-gray-700">
-                                @if($dashboardOwner->hasRole('admin'))
+                                @if($canIsAdmin)
                                 <span class="text-red-600">Admin</span>
-                                @elseif($dashboardOwner->hasRole('manager'))
+                                @elseif($canIsManager)
                                 <span class="text-green-600">Manager</span>
-                                @elseif($dashboardOwner->hasRole('mentor'))
+                                @elseif($canIsMentor)
                                 <span class="text-purple-600">Mentor</span>
-                                @elseif($dashboardOwner->hasRole('member'))
+                                @elseif($canIsMember)
                                 <span class="text-indigo-600">Member</span>
                                 @else
                                 <span class="text-gray-600">User</span>

@@ -29,10 +29,17 @@ class CheckSponsor extends Component
     $user = User::where('username', $username)->where('is_active', true)->first();
         if ($user) {
             $this->error = '';
-            $this->emitUp('sponsorValid', $user->id);
+            // Prefer emitting upward via Livewire if available; otherwise dispatch a browser event
+            if (method_exists($this, 'emitUp')) {
+                $this->emitUp('sponsorValid', $user->id);
+            }
+            $this->dispatchBrowserEvent('sponsor-valid', ['id' => $user->id]);
         } else {
             $this->error = 'Sponsor must be an active member.';
-            $this->emitUp('sponsorInvalid');
+            if (method_exists($this, 'emitUp')) {
+                $this->emitUp('sponsorInvalid');
+            }
+            $this->dispatchBrowserEvent('sponsor-invalid');
         }
     }
 

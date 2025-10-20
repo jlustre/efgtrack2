@@ -90,6 +90,38 @@ class User extends Authenticatable
     }
 
     /**
+     * Assigned mentor
+     */
+    public function mentor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_mentor_id');
+    }
+
+    /**
+     * Assigned manager
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_manager_id');
+    }
+
+    /**
+     * State/province relation
+     */
+    public function stateProvince(): BelongsTo
+    {
+        return $this->belongsTo(StateProvince::class, 'state_id');
+    }
+
+    /**
+     * Country relation
+     */
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
+    /**
      * Get all users sponsored by this user.
      */
     public function sponsoredMembers(): HasMany
@@ -138,13 +170,37 @@ class User extends Authenticatable
      */
     public function getLocationAttribute(): string
     {
-        $parts = array_filter([
-            $this->city,
-            $this->province_state,
-            $this->country
-        ]);
-        
+        // Prefer related state/country names if available, otherwise fall back to raw fields
+        $parts = [];
+        if (!empty($this->city)) {
+            $parts[] = $this->city;
+        }
+        $state = optional($this->stateProvince)->name ?? ($this->province_state ?? null);
+        if (!empty($state)) {
+            $parts[] = $state;
+        }
+        $country = optional($this->country)->name ?? ($this->country ?? null);
+        if (!empty($country)) {
+            $parts[] = $country;
+        }
+
         return implode(', ', $parts);
+    }
+
+    /**
+     * Get a formatted phone number for display.
+     */
+    public function getFormattedPhoneAttribute(): string
+    {
+        $num = $this->phone ?? $this->phone_number ?? null;
+        if (empty($num)) return '-';
+        $n = preg_replace('/[^0-9+]/', '', $num);
+        if (str_starts_with($n, '+') && strlen($n) > 10) return $n;
+        $d = preg_replace('/\D/', '', $n);
+        if (strlen($d) == 10) {
+            return sprintf('(%s) %s-%s', substr($d,0,3), substr($d,3,3), substr($d,6));
+        }
+        return $num;
     }
 
     /**
@@ -153,7 +209,7 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar_path) {
-            return asset('storage/' . $this->avatar_path);
+            return asset('storage/avatars/' . ltrim($this->avatar_path, '/'));
         }
 
         // Generate initials-based avatar as fallback

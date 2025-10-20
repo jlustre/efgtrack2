@@ -8,9 +8,24 @@ document.addEventListener('DOMContentLoaded', function() {
     @auth
     if (window.EFGTheme && window.EFGTheme.UI) {
         console.log('Initializing authenticated theme system');
-        window.EFGTheme.UI.init();
-    } else {
-        console.error('EFGTheme.UI not found');
+        try {
+            window.EFGTheme.UI.init();
+        } catch (e) {
+            console.warn('EFGTheme.UI.init failed, falling back to Utils/localStorage', e);
+        }
+    } else if (window.EFGTheme && window.EFGTheme.Utils) {
+        // If UI object is not present but Utils exists, apply saved theme via Utils
+        console.log('EFGTheme.UI not present; applying theme via Utils fallback');
+        const savedTheme = localStorage.getItem('efgtrack-theme');
+        if (savedTheme) {
+            const theme = JSON.parse(savedTheme);
+            Object.keys(theme).forEach(colorType => {
+                window.EFGTheme.Utils.updateCSSVariables(colorType, theme[colorType]);
+            });
+            if (typeof window.EFGTheme.Utils.applyThemeToElements === 'function') {
+                window.EFGTheme.Utils.applyThemeToElements();
+            }
+        }
     }
     @else
     if (window.EFGTheme && window.EFGTheme.Utils) {
