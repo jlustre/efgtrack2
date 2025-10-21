@@ -1,9 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
+
+<!-- Main Content -->
 <div class="md:pl-64 flex flex-col flex-1">
     <!-- Top Header -->
-    @include('components.topnav-user', ['title_hdr' => 'Create New User'])
+    @include('components.top-header', ['title_hdr' => __('Create New User'), 'viewingContext' => $viewingContext ??
+    null])
     <!-- Main Content Area -->
     <div class="py-3 md:py-4 pt-10 md:pt-3">
         @if($errors->any())

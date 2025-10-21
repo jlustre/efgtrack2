@@ -1,10 +1,12 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
-<div class="flex">
-    <div class="w-64">
-        @include('components.dashboard-sidebar', ['user' => Auth::user()])
-    </div>
+
+<!-- Main Content -->
+<div class="md:pl-64 flex flex-col flex-1">
+    <!-- Top Header -->
+    @include('components.top-header', ['title_hdr' => __('Edit User'), 'viewingContext' => $viewingContext ??
+    null])
     <div class="flex-1 container mx-auto py-8">
         <h1 class="text-2xl font-bold mb-6">{{ __('Edit User') }}</h1>
         @if($errors->any())

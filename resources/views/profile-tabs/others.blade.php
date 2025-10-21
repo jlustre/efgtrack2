@@ -68,13 +68,6 @@
             <input id="updated_at" type="text" readonly value="{{ $ua ? $ua->format('Y-m-d H:i') : '—' }}"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" />
         </div>
-
-        <div>
-            <x-input-label for="deleted_at" :value="__('Deleted At')" />
-            @php $da = $asCarbon(optional($profileUser)->deleted_at); @endphp
-            <input id="deleted_at" type="text" readonly value="{{ $da ? $da->format('Y-m-d H:i') : '—' }}"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" />
-        </div>
     </div>
 
 </div>

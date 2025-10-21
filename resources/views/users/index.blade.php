@@ -1,9 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
+
+<!-- Main Content -->
 <div class="md:pl-64 flex flex-col flex-1">
     <!-- Top Header -->
-    @include('components.topnav-user', ['title_hdr' => __('User Management')])
+    @include('components.top-header', ['title_hdr' => __('User Management'), 'viewingContext' => $viewingContext ??
+    null])
 
     <!-- Main Content Area -->
     <div class="py-3 md:py-4 pt-10 md:pt-3">
@@ -71,6 +74,7 @@
                     <table class="min-w-full bg-white border table-auto whitespace-nowrap">
                         <thead>
                             <tr class="text-left">
+                                <th class="py-2 px-4 border-b">{{ __('Actions') }}</th>
                                 <th class="py-2 px-4 border-b">
                                     @php $d = ($sort === 'id' && $direction === 'asc') ? 'desc' : 'asc'; @endphp
                                     <a href="{{ route('users.index', array_merge(request()->except('page'), ['sort' => 'id', 'direction' => $d])) }}"
@@ -149,7 +153,6 @@
                                 <th class="py-2 px-4 border-b hidden lg:table-cell">{{ __('Assigned Manager') }}</th>
                                 <th class="py-2 px-4 border-b hidden lg:table-cell">{{ __('Created') }}</th>
                                 <th class="py-2 px-4 border-b hidden lg:table-cell">{{ __('Member Status') }}</th>
-                                <th class="py-2 px-4 border-b">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y">
@@ -162,6 +165,32 @@
                             }
                             @endphp
                             <tr class="hover:bg-gray-50">
+                                <td class="py-2 px-4 border-b align-top">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{{ route('users.edit', $user) }}" title="{{ __('Edit') }}"
+                                            class="inline-flex items-center p-1 rounded-full bg-yellow-400 text-white group hover:shadow">
+                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5h6M12 7l7 7-4 4-7-7 4-4z" />
+                                            </svg>
+                                        </a>
+
+                                        <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" title="{{ __('Delete') }}"
+                                                onclick="return confirm('{{ __('Are you sure?') }}')"
+                                                class="inline-flex items-center p-1 rounded-full bg-red-500 text-white group hover:shadow">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                                 <td class="py-2 px-4 border-b align-top">{{ $user->id }}</td>
                                 <td class="py-2 px-4 border-b align-top">
                                     @if($avatar)
@@ -194,32 +223,7 @@
                                 <td class="py-2 px-4 border-b text-center hidden lg:table-cell align-top">{{
                                     $user->member_status ?? $user->status ?? '-' }}</td>
 
-                                <td class="py-2 px-4 border-b align-top">
-                                    <div class="flex items-center space-x-2">
-                                        <a href="{{ route('users.edit', $user) }}" title="{{ __('Edit') }}"
-                                            class="inline-flex items-center p-1 rounded-full bg-yellow-400 text-white group hover:shadow">
-                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 5h6M12 7l7 7-4 4-7-7 4-4z" />
-                                            </svg>
-                                        </a>
 
-                                        <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" title="{{ __('Delete') }}"
-                                                onclick="return confirm('{{ __('Are you sure?') }}')"
-                                                class="inline-flex items-center p-1 rounded-full bg-red-500 text-white group hover:shadow">
-                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -261,4 +265,6 @@
             <div class="mt-4">{{ $users->links() }}</div>
         </div>
     </div>
-    @endsection
+</div>
+
+@endsection

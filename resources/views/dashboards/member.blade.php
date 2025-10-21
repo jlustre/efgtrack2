@@ -3,21 +3,7 @@
 @section('content')
 <div class="md:pl-64 flex flex-col flex-1">
     <!-- Top Header -->
-    <div class="sticky top-0 z-10 bg-white shadow-sm border-b border-gray-200">
-        <div class="px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <h2 class="font-semibold text-xl text-gray-800">
-                    Member Dashboard
-                    @if(isset($viewingContext))
-                    <span class="text-sm font-normal text-gray-600 ml-2">
-                        (Viewing as {{ $viewingContext['viewing_as'] }})
-                    </span>
-                    @endif
-                </h2>
-                @include('components.topnav-user')
-            </div>
-        </div>
-    </div>
+    @include('components.top-header', ['title_hdr' => 'Member Dashboard', 'viewingContext' => $viewingContext ?? null])
 
     <!-- Main Content Area -->
     <div class="py-6 md:py-8 pt-20 md:pt-6">

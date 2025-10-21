@@ -189,7 +189,7 @@ class UpdateProfileInformationForm extends Component
         $user = $this->user;
         // continue processing
 
-    $validated = $this->validate([
+    $rules = [
             'name' => ['required', 'string', 'max:255'],
             'first_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['nullable', 'string', 'max:255'],
@@ -205,7 +205,6 @@ class UpdateProfileInformationForm extends Component
             'emergency_contact' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
             'province_state' => ['nullable', 'string', 'max:255'],
-            'country' => ['nullable', 'string', 'size:2'],
             'timezone' => ['nullable', 'string', 'max:255'],
             'preferred_contact_method' => ['required', 'in:email,phone,both'],
             'email_notifications' => ['boolean'],
@@ -217,7 +216,14 @@ class UpdateProfileInformationForm extends Component
             'is_licensed' => ['nullable', 'in:0,1'],
             'best_contact_times' => ['nullable', 'string', 'max:255'],
             'sponsor_id' => ['nullable', 'integer', 'exists:users,id'],
-        ]);
+        ];
+
+        // Exclude 'country' field validation for the 'personal' tab
+        if ($this->tab !== 'personal') {
+            $rules['country'] = ['nullable', 'string', 'size:2'];
+        }
+
+        $validated = $this->validate($rules);
 
         // Map validated inputs to user attributes (some keys may not match DB names)
         $map = $validated;

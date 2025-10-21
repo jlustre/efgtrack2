@@ -5,7 +5,8 @@
 <!-- Main Content -->
 <div class="md:pl-64 flex flex-col flex-1">
     <!-- Top Header -->
-    @include('components.topnav-user', ['title_hdr' => __('Admin Dashboard')])
+    @include('components.top-header', ['title_hdr' => __('Admin Dashboard'), 'viewingContext' => $viewingContext ??
+    null])
 
     <!-- Main Content Area -->
     <div class="py-6 md:py-8 pt-20 md:pt-6">
